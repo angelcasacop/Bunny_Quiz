@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Quiz Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: url('kio.png') center/cover no-repeat fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .quiz-card {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .bunny-ears {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+        }
+        .ear {
+            width: 50px;
+            height: 120px;
+            background: #f48fb1;
+            border-radius: 50%;
+            border: 4px solid white;
+        }
+        .ear.left { transform: rotate(-20deg); }
+        .ear.right { transform: rotate(20deg); }
+        
+        /* Intro Styles */
+        .intro-container {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .intro-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 1.5rem;
+        }
+        .intro-emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+        .intro-description {
+            font-size: 1.3rem;
+            color: #616161;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+        
+        .progress-section {
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #7b1fa2;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #ce93d8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f48fb1 0%, #7b1fa2 100%);
+            transition: width 0.5s ease;
+        }
+        .question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #424242;
+            margin-bottom: 2rem;
+        }
+        .option {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 1rem;
+        }
+        .option:hover {
+            border-color: #ba68c8;
+            box-shadow: 0 4px 12px rgba(186,104,200,0.3);
+            transform: translateY(-2px);
+        }
+        .option.selected {
+            background: linear-gradient(135deg, #f8bbd0 0%, #e1bee7 100%);
+            border-color: #ba68c8;
+            box-shadow: 0 4px 16px rgba(186,104,200,0.4);
+        }
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ce93d8;
+            border-radius: 15px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .text-input:focus {
+            outline: none;
+            border-color: #7b1fa2;
+        }
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f48fb1 0%, #ba68c8 100%);
+            box-shadow: 0 4px 15px rgba(244,143,177,0.4);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(244,143,177,0.6);
+        }
+        .btn-primary:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .btn-submit {
+            width: 100%;
+        }
+        .btn-start {
+            padding: 1.5rem 3rem;
+            font-size: 1.3rem;
+        }
+        .btn-more {
+            width: 100%;
+            padding: 1.5rem 2rem;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+        .results {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 1rem;
+        }
+        .score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #f48fb1;
+            margin: 1.5rem 0;
+        }
+        .results-message {
+            font-size: 1.5rem;
+            color: #616161;
+            margin-bottom: 2rem;
+        }
+        .review-item {
+            background: #f3e5f5;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .review-header {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        .icon {
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+            font-size: 1.2rem;
+        }
+        .icon.correct { color: #4caf50; }
+        .icon.incorrect { color: #f44336; }
+        .review-question {
+            font-weight: 600;
+            color: #424242;
+            margin-bottom: 0.5rem;
+        }
+        .review-answer {
+            font-size: 0.9rem;
+            color: #616161;
+            margin-top: 0.3rem;
+        }
+        .review-answer.user {
+            color: #1976d2;
+        }
+        .review-answer.correct-ans {
+            color: #4caf50;
+        }
+        .decorative {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+        .carrot { bottom: 1rem; left: 1rem; }
+        .flower { top: 5rem; right: 1rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="quiz-card">
+        <div class="bunny-ears">
+            <div class="ear left"></div>
+            <div class="ear right"></div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div id="intro-container" class="intro-container">
+            <h1 class="intro-title">Bunny Expert Quiz</h1>
+            <p class="intro-description">
+                Do you truly know your bunny?<br>
+                Take this quiz to get your results!
+            </p>
+            <button id="start-btn" class="btn btn-primary btn-start">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="hidden">
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-text" id="progress-text">Question 1 of 10</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="question" id="question-text"></h2>
+                <div id="options-container"></div>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results-container" class="hidden">
+            <div class="results">
+                <h2 class="results-title"> Quiz Complete! 🐰</h2>
+                <div class="score" id="final-score">0 / 10</div>
+                <p class="results-message" id="results-message"></p>
+                
+                <div id="review-list" style="margin-bottom: 2rem;"></div>
+                
+                <button id="more-btn" class="btn btn-primary btn-more">Press for 1 Last Surprise</button>
+            </div>
+        </div>
+
+        <div class="decorative carrot">🥕</div>
+        <div class="decorative flower">🌸</div>
+    </div>
+
+  <script>
+const questions = [
+    {
+        id: 1,
+        type: 'text',
+        inputType: 'text',
+        question: "What is kiiochan's favorite ice cream brand?",
+        correct: 'Magnum'
+    },
+    {
+        id: 2,
+        type: 'text',
+        inputType: 'number',
+        question: "How many Genshin Impact accounts does kiiochan have?",
+        correct: '36'
+    },
+    {
+        id: 3,
+        type: 'image',
+        question: "Choose yo daily poop scale.",
+        image: 'poop.png',
+        correct: null
+    },
+    {
+        id: 4,
+        type: 'multi-select',
+        question: "Which of the following are kiiochan's top 5 most-used words? (Choose exactly 5)",
+        options: [
+            "Don't PMO!",
+            "bomboclatt",
+            "I HATE filipinos!",
+            "Beta",
+            "IDGAF",
+            "Baga",
+            "susmaryosep",
+            "Fat f*cking chud"
+        ],
+        correct: [
+            "Don't PMO!",
+            "Beta",
+            "Fat f*cking chud",
+            "Baga",
+            "IDGAF"
+        ]
+    },
+    {
+        id: 5,
+        type: 'multiple',
+        question: "Which statement about kiiochan is true?",
+        options: [
+            "Kiiochan once sleep-talked her entire McDonald's order to her aunt and was confused when she woke up to the exact order she wanted.",
+            "Kiiochan sleep-talked and had a full conversation with shitoshitoshitoito."
+        ],
+        correct: 0
+    },
+    {
+        id: 6,
+        type: 'multiple',
+        question: "Who was kiiochan's favorite Sanrio character when she was a kid?",
+        options: [
+            "Gudetama",
+            "Pompompurin",
+            "Cinnamoroll",
+            "Keroppi",
+            "My Melody"
+        ],
+        correct: 4
+    },
+    {
+        id: 7,
+        type: 'multiple',
+        question: "Which meat does kiiochan hate the most?",
+        options: ["Lamb", "Beef", "Pork"],
+        correct: 2
+    },
+    {
+        id: 8,
+        type: 'multiple',
+        question: "Choose the correct ratio if you're really kiiochan.",
+        options: ["60:40", "70:30", "80:20", "30:20"],
+        correct: 0
+    },
+    {
+        id: 9,
+        type: 'multiple',
+        question: "What insect does kiiochan specifically hate the most?",
+        options: [
+            "Cockroach",
+            "Stinky Cockroach",
+            "Flying Cockroach",
+            "Nudaeng Cockroach"
+        ],
+        correct: 2
+    },
+    {
+        id: 10,
+        type: 'multiple',
+        question: "Are you colorblind, kiiochan?",
+        options: [
+            "Yes",
+            "No",
+            "What are you talking about?",
+            "Please speed, I need this"
+        ],
+        correct: null
+    }
+];
+
+const youtubeUrl = 'https://www.youtube.com/watch?v=4F0wv-E35lE';
+
+let currentQ = 0;
+let answers = {};
+
+document.getElementById('start-btn').onclick = () => {
+    document.getElementById('intro-container').classList.add('hidden');
+    document.getElementById('quiz-container').classList.remove('hidden');
+    showQuestion();
+};
+
+function showQuestion() {
+    const q = questions[currentQ];
+    document.getElementById('question-text').textContent = q.question;
+    document.getElementById('progress-text').textContent =
+        `Question ${currentQ + 1} of ${questions.length}`;
+    document.getElementById('progress-fill').style.width =
+        `${((currentQ + 1) / questions.length) * 100}%`;
+
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+
+    if (q.type === 'image') {
+        const img = document.createElement('img');
+        img.src = q.image;
+        img.style.width = '100%';
+        img.style.borderRadius = '15px';
+        img.style.marginBottom = '1rem';
+        container.appendChild(img);
+        createTextInput(container, 'number');
+    }
+
+    else if (q.type === 'text') {
+        createTextInput(container, q.inputType || 'text');
+    }
+
+    else if (q.type === 'multiple') {
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.textContent = opt;
+            btn.onclick = () => selectOption(idx);
+            container.appendChild(btn);
+        });
+    }
+
+    else if (q.type === 'multi-select') {
+        answers[currentQ] = [];
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.textContent = opt;
+            btn.onclick = () => toggleMulti(opt, btn);
+            container.appendChild(btn);
+        });
+
+        const submit = document.createElement('button');
+        submit.className = 'btn btn-primary btn-submit';
+        submit.textContent = 'Submit (5 required)';
+        submit.onclick = submitMulti;
+        container.appendChild(submit);
+    }
+}
+
+function createTextInput(container, type) {
+    const input = document.createElement('input');
+    input.type = type;
+    input.className = 'text-input';
+    input.placeholder = type === 'number' ? 'Enter a number only...' : 'Type your answer...';
+
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-submit';
+    btn.textContent = 'Submit Answer';
+    btn.onclick = () => {
+        if (!input.value.trim()) return;
+        answers[currentQ] = input.value.trim();
+        next();
+    };
+
+    container.appendChild(input);
+    container.appendChild(btn);
+}
+
+function selectOption(idx) {
+    answers[currentQ] = idx;
+    next();
+}
+
+function toggleMulti(opt, btn) {
+    const list = answers[currentQ];
+    if (list.includes(opt)) {
+        answers[currentQ] = list.filter(o => o !== opt);
+        btn.classList.remove('selected');
+    } else {
+        list.push(opt);
+        btn.classList.add('selected');
+    }
+}
+
+function submitMulti() {
+    if (answers[currentQ].length !== 5) {
+        alert('You must choose exactly 5 options!!!');
+        return;
+    }
+    next();
+}
+
+function next() {
+    if (currentQ < questions.length - 1) {
+        currentQ++;
+        showQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    let score = 0;
+    const reviewList = document.getElementById('review-list');
+    reviewList.innerHTML = '';
+
+    questions.forEach((q, i) => {
+        const a = answers[i];
+        let isCorrect = false;
+        let userAnswer = '';
+        let correctAnswer = '';
+
+        if (q.correct === null) {
+            isCorrect = true;
+            userAnswer = a;
+            correctAnswer = 'Any answer accepted';
+        } else if (q.type === 'multi-select') {
+            isCorrect = JSON.stringify(a.sort()) === JSON.stringify(q.correct.sort());
+            userAnswer = a.join(', ');
+            correctAnswer = q.correct.join(', ');
+        } else if (q.type === 'multiple') {
+            isCorrect = a === q.correct;
+            userAnswer = q.options[a];
+            correctAnswer = q.options[q.correct];
+        } else if (q.type === 'text') {
+            isCorrect = a?.toLowerCase() === q.correct.toLowerCase();
+            userAnswer = a;
+            correctAnswer = q.correct;
+        }
+
+        if (isCorrect) score++;
+
+        // Create review item
+        const item = document.createElement('div');
+        item.className = 'review-item';
+        item.innerHTML = `
+            <div class="review-header">
+                <span class="icon ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✓' : '✗'}</span>
+                <div style="flex: 1;">
+                    <div class="review-question">Q${i + 1}: ${q.question}</div>
+                    <div class="review-answer user">Your answer: ${userAnswer}</div>
+                    ${!isCorrect ? `<div class="review-answer correct-ans">Correct answer: ${correctAnswer}</div>` : ''}
+                </div>
+            </div>
+        `;
+        reviewList.appendChild(item);
+    });
+
+    document.getElementById('quiz-container').classList.add('hidden');
+    document.getElementById('results-container').classList.remove('hidden');
+    document.getElementById('final-score').textContent =
+        `${score} / ${questions.length}`;
+    
+    const percentage = (score / questions.length) * 100;
+    let message = '';
+    if (percentage === 100) message = 'Perfect! You truly are a bunny expert! 🎉';
+    else if (percentage >= 80) message = 'Great job! You know your bunny well! 🌟';
+    else if (percentage >= 60) message = 'Not bad! There\'s still more to learn! 🐰';
+    else message = 'Keep trying! You\'ll get there! 💪';
+    
+    document.getElementById('results-message').textContent = message;
+}
+
+document.getElementById('more-btn').onclick = () => {
+    window.open(youtubeUrl, '_blank');
+};
+</script>
+
+</body>
+</html>
